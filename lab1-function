@@ -12,8 +12,8 @@
 int NumericValue(char);
 int ConversionToDecInt(char*, int);
 long double ConversionToDecFloat(char*, int);
-inline char CharacterDesignation(int number);
-inline char* ConversionFromDecInt(int, int);
+char CharacterDesignation(int number);
+char* ConversionFromDecInt(int, int);
 char* ConversionFromDecFloat(long double, int);
 char* AcceptableSymbols(int);
 bool IsAnIncorrectBase(int);
@@ -25,14 +25,14 @@ bool IsNotNumber(char *, int);
 #endif
 
 
-bool IsAnIncorrectBase(int base) {
+bool inline IsAnIncorrectBase(int base) {
     if (base > 16 || base < 2)
         return true;
     return false;
 }
 
 /* Returns the numeric value of a character using the ASCII table. */
-int NumericValue(char character) {
+int inline NumericValue(char character) {
     if (character >= '0' && character <= '9')
         return character - '0';
 
@@ -46,7 +46,7 @@ int NumericValue(char character) {
 }
 
 /* Returns the character designation of a number using the ASCII table. */
-char CharacterDesignation(int number) {
+char inline CharacterDesignation(int number) {
     if (number >= 0 && number <= 9)
         return (char)('0' + number);
 
@@ -57,7 +57,7 @@ char CharacterDesignation(int number) {
  * Sums the numerical values of each character multiplied by the base of
  * the number system to the power of the character's number in the number,
  * from right to left starting with 0 */
-int ConversionToDecInt(char *num, int base){
+int inline ConversionToDecInt(char *num, int base){
     int res = 0;
     int len = (int)strlen(num);
 
@@ -72,7 +72,7 @@ int ConversionToDecInt(char *num, int base){
  * the number system to the power of the character's number in the number
  * (the whole part is numbered from right to left starting with zero, and
  * the fractional part starts with -1 and goes negative) */
-long double ConversionToDecFloat(char *num, int b){
+long double inline ConversionToDecFloat(char *num, int b){
     int i = 0, pointindex = 0;
     long double res = 0;
 
@@ -93,7 +93,7 @@ long double ConversionToDecFloat(char *num, int b){
 }
 
 /* Converts an integer from decimal to a certain number system. */
-char* ConversionFromDecInt(int num, int base) {
+char inline *ConversionFromDecInt(int num, int base) {
     if (num == 0) {
         char *res = malloc(2 * sizeof(char));
         *res = '0';
@@ -130,7 +130,7 @@ char* ConversionFromDecInt(int num, int base) {
  * The character designation of the integer part of the resulting number
  * is the first digit after the decimal point of the converted number.
  * The fractional remainder is then converted in a similar manner. */
-char* ConversionFromDecFloat(long double num, int base) {
+char inline *ConversionFromDecFloat(long double num, int base) {
     int singsafterdot = 0;
     char *res = malloc(14 * sizeof(char));
 
@@ -154,7 +154,7 @@ char* ConversionFromDecFloat(long double num, int base) {
 }
 
 /* Returns a list of characters that are valid in the given number system. */
-char* AcceptableSymbols(int base) {
+char inline *AcceptableSymbols(int base) {
     char *listofcharacters = malloc((base  + 2)* sizeof(char));
 
     for (int i = 0; i < base; i++)
@@ -167,7 +167,7 @@ char* AcceptableSymbols(int base) {
 }
 
 /* checks that all characters in the number satisfy the given number system */
-bool IsSatisfyingTheBase(char *num, int base) {
+bool inline IsSatisfyingTheBase(char *num, int base) {
     char *list = AcceptableSymbols(base);
 
     for (int i = 0; *(num + i) != '\0'; i++) {
@@ -189,7 +189,7 @@ bool IsSatisfyingTheBase(char *num, int base) {
 }
 
 /* Checks if there is a dot in the number */
-bool IsThereAPoint(char* num) {
+bool inline IsThereAPoint(char* num) {
     int i = 0;
     while (*(num + i) != '\0') {
         if (*(num + i) == '.')
@@ -201,14 +201,14 @@ bool IsThereAPoint(char* num) {
 
 /*Checks whether the number exceeds the allowed length for an integer
  * or a real number.*/
-bool IsTooLong(char *num, bool pnt, int len) {
+bool inline IsTooLong(char *num, bool pnt, int len) {
     if ((pnt == true && len > 13) || (pnt == false && len > 12))
         return true;
     return false;
 }
 
 /* Checks whether there are any character combinations that are invalid for a number */
-bool IsNotNumber(char *num, int len) {
+bool inline IsNotNumber(char *num, int len) {
     if ((*num == '0' && *(num + 1) == '0') || (*num == '.') || (*(num + len - 1) == '.'))
         return true;
 
