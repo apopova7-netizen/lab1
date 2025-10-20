@@ -1,1 +1,228 @@
+//
+// Created by Lenovo on 15.10.2025.
+//
+#ifndef HEADER_LAB1_H
+#define HEADER_LAB1_H
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <stdbool.h>
 
+int NumericValue(char);
+int ConversionToDecInt(char*, int);
+long double ConversionToDecFloat(char*, int);
+inline char CharacterDesignation(int number);
+inline char* ConversionFromDecInt(int, int);
+char* ConversionFromDecFloat(long double, int);
+char* AcceptableSymbols(int);
+bool IsAnIncorrectBase(int);
+bool IsSatisfyingTheBase(char*,int);
+bool IsThereAPoint(char*);
+bool IsTooLong(char *, bool, int);
+bool IsNotNumber(char *, int);
+
+#endif
+
+
+bool IsAnIncorrectBase(int base) {
+    if (base > 16 || base < 2)
+        return true;
+    return false;
+}
+
+/* Returns the numeric value of a character using the ASCII table. */
+int NumericValue(char character) {
+    if (character >= '0' && character <= '9')
+        return character - '0';
+
+    if (character >= 'a' && character <= 'f')
+        return character - 'a' + 10;
+
+    if (character >= 'A' && character <= 'F')
+        return character - 'A' + 10;
+
+    return 0;
+}
+
+/* Returns the character designation of a number using the ASCII table. */
+char CharacterDesignation(int number) {
+    if (number >= 0 && number <= 9)
+        return (char)('0' + number);
+
+    return (char)('a' + (number - 10));
+}
+
+/* Converts an integer from a certain number system to decimal.
+ * Sums the numerical values of each character multiplied by the base of
+ * the number system to the power of the character's number in the number,
+ * from right to left starting with 0 */
+int ConversionToDecInt(char *num, int base){
+    int res = 0;
+    int len = (int)strlen(num);
+
+    for (int i = 0; i < len; i++)
+        res += NumericValue(*(num + i)) * (int)pow(base,len - i - 1);
+
+    return res;
+}
+
+/* Converts a real number from a certain number system to decimal.
+ * Sums the numerical values of each character multiplied by the base of
+ * the number system to the power of the character's number in the number
+ * (the whole part is numbered from right to left starting with zero, and
+ * the fractional part starts with -1 and goes negative) */
+long double ConversionToDecFloat(char *num, int b){
+    int i = 0, pointindex = 0;
+    long double res = 0;
+
+    while (*(num + i) != '.')
+        i++;
+    pointindex = i;
+
+    i = 0;
+    int j = pointindex - 1;
+    while (*(num + i)!= '\0') {
+        if (*(num + i) != '.') {
+            res += NumericValue(num[i]) * pow(b,j);
+            j--;
+        }
+        i++;
+    }
+    return res;
+}
+
+/* Converts an integer from decimal to a certain number system. */
+char* ConversionFromDecInt(int num, int base) {
+    if (num == 0) {
+        char *res = malloc(2 * sizeof(char));
+        *res = '0';
+        *(res + 1) = '\0';
+        return res;
+    }
+
+    int lenres = 0;
+    int copynum = num;
+
+    /* Defines the length of the converted number. */
+    while (copynum > 0) {
+        lenres++;
+        copynum /= base;
+    }
+
+    char *res = malloc((lenres + 1)  * sizeof(char));
+    *(res + lenres) = '\0';
+
+    /* Fills an array with characters in reverse order. */
+    int i = lenres - 1;
+    while (num > 0) {
+        char character = CharacterDesignation(num % base);
+        *(res + i) = character;
+        num /= base;
+        i--;
+    }
+
+    return res;
+}
+
+/* Converts the fractional part of a number from decimal to a certain number
+ * system. Multiplies the fractional part by the base of the number system.
+ * The character designation of the integer part of the resulting number
+ * is the first digit after the decimal point of the converted number.
+ * The fractional remainder is then converted in a similar manner. */
+char* ConversionFromDecFloat(long double num, int base) {
+    int singsafterdot = 0;
+    char *res = malloc(14 * sizeof(char));
+
+    /* Needs to get the first 12 digits after decimal point */
+    while (singsafterdot < 12) {
+        char character = CharacterDesignation((int)(num * base));
+        *(res + singsafterdot) = character;
+
+        singsafterdot ++;
+        num = (num * base) - (int)(num * base);
+
+        /* Returns the result earlier if there are fewer than 12 digits after
+         * the decimal point.*/
+        if (num == (int)num) {
+            *(res + singsafterdot) = '\0';
+            return res;
+        }
+    }
+    *(res + singsafterdot) = '\0';
+    return res;
+}
+
+/* Returns a list of characters that are valid in the given number system. */
+char* AcceptableSymbols(int base) {
+    char *listofcharacters = malloc((base  + 2)* sizeof(char));
+
+    for (int i = 0; i < base; i++)
+        *(listofcharacters + i) = CharacterDesignation(i);
+
+    *(listofcharacters + base) = '.';
+    *(listofcharacters + base + 1) = '\0';
+
+    return listofcharacters;
+}
+
+/* checks that all characters in the number satisfy the given number system */
+bool IsSatisfyingTheBase(char *num, int base) {
+    char *list = AcceptableSymbols(base);
+
+    for (int i = 0; *(num + i) != '\0'; i++) {
+        bool validcharacter = false;
+
+        for (int j  = 0; *(list + j) != '\0'; j++)
+            if (*(num + i) == *(list + j)) {
+                validcharacter = true;
+                break;
+            }
+
+        if (validcharacter == false) {
+            free(list);
+            return false;
+        }
+    }
+    free(list);
+    return true;
+}
+
+/* Checks if there is a dot in the number */
+bool IsThereAPoint(char* num) {
+    int i = 0;
+    while (*(num + i) != '\0') {
+        if (*(num + i) == '.')
+            return true;
+        i++;
+    }
+    return false;
+}
+
+/*Checks whether the number exceeds the allowed length for an integer
+ * or a real number.*/
+bool IsTooLong(char *num, bool pnt, int len) {
+    if ((pnt == true && len > 13) || (pnt == false && len > 12))
+        return true;
+    return false;
+}
+
+/* Checks whether there are any character combinations that are invalid for a number */
+bool IsNotNumber(char *num, int len) {
+    if ((*num == '0' && *(num + 1) == '0') || (*num == '.') || (*(num + len - 1) == '.'))
+        return true;
+
+    int pointscounter = 0;
+    int i = 0;
+
+    while (*(num + i) != '\0') {
+        if (*(num + i) == '.') {
+            pointscounter++;
+
+            if (pointscounter > 1)
+                return true;
+        }
+        i++;
+    }
+    return false;
+}
