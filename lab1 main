@@ -1,1 +1,85 @@
 
+
+#include "function lab-1.h"
+
+int main(void) {
+    int basenumbersystem1, basenumbersystem2;
+    bool point = false;
+    char *number = malloc(15 * sizeof(char));
+
+    /* Entering the bases of number systems and checking their correctness */
+    puts("Enter the bases of the initial and final number systems");
+    int correctinput = scanf("%d %d",&basenumbersystem1, &basenumbersystem2);
+
+    if (correctinput != 2 || IsAnIncorrectBase(basenumbersystem1) || IsAnIncorrectBase(basenumbersystem2)) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    puts("Enter the number");
+    scanf("%14s",number);
+
+    if (IsThereAPoint(number))
+        point = true;
+
+    if (IsTooLong(number, point, (int)strlen(number))) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    if (IsSatisfyingTheBase( number, basenumbersystem1) == false) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    if (point == false) {
+        /* Checking that an integer does not start with zero unless it
+         * is zero itself */
+        if (*number == '0' && strlen(number) > 1) {
+            puts("Bad input");
+            free(number);
+            return 0;
+        }
+        /* If the integer is entered correctly, it converts from the initial
+         * number system to decimal and from decimal to the final number system. */
+        int dec = ConversionToDecInt(number, basenumbersystem1);
+        char* result = ConversionFromDecInt(dec, basenumbersystem2);
+
+        printf("%s\n", result);
+        free(result);
+    }
+
+    else {
+        if (IsNotNumber(number, (int)strlen(number)) == true) {
+            puts("Bad input");
+            free(number);
+            return 0;
+        }
+        /* If the real number is entered correctly. Performs conversion from the
+         * initial number system to decimal.*/
+        long double dec = ConversionToDecFloat(number, basenumbersystem1);
+
+        /* Finds the whole and fractional parts of a real number. And separately
+         * converts it to a finite number system */
+        int integerpart = (int)dec;
+        char* result = ConversionFromDecInt(integerpart, basenumbersystem2);
+
+        long double fractionpart = dec - integerpart;
+        char* resultfrac = ConversionFromDecFloat(fractionpart, basenumbersystem2);
+
+        printf("%s.", result);
+        printf("%s", resultfrac);
+
+        free(resultfrac);
+        free(result);
+    }
+    free(number);
+    return 0;
+}
+
+
+
+
