@@ -6,40 +6,46 @@
 
 int main(void) {
     int basenumbersystem1, basenumbersystem2;
-    
+
+    /* Asks for the base of the number system. */
     puts("Enter the bases of the initial number systems");
     scanf("%d", &basenumbersystem1);
-    
+
     puts("Enter the bases of the final number systems");
     scanf("%d", &basenumbersystem2);
-    
+
+    /* Checks if the base is entered correctly. */
     if (ValideteBase(basenumbersystem1) == 0 || ValideteBase(basenumbersystem2) == 0) {
         puts("Bad input");
         return 0;
     }
-    
+    /* Allocates memory for the number. */
     char *number = malloc(15 * sizeof(char)); //проверка выделения памяти
     if (number == NULL) {
         puts("Memory Error");
         return 0;
     }
-    
+     /* Asks for the number. */
     puts("Enter the number");
     scanf("%14s", number);
-    
+
+    /* Checks if the number is entered correctly. */
     if (ValideteNumber(number, basenumbersystem1, (int)strlen(number)) == 0) {
         puts("Bad input");
         free(number);
         return 0;
     }
-    
+    /*Converts the number to the decimal number system from the initial
+     *number system.*/
     double numberindecimal = StringToDecimal(number, basenumbersystem1);
-    
+
+    /* Converts the number from the decimal number system to the final number system. */
     char * result = DecimalToString(numberindecimal, basenumbersystem2);
     printf("%s\n", result);
-    
+
     free(number);
     free(result);
-    
+
     return 0;
 }
+
