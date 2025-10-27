@@ -6,30 +6,40 @@
 
 int main(void) {
     int basenumbersystem1, basenumbersystem2;
+    
     puts("Enter the bases of the initial number systems");
     scanf("%d", &basenumbersystem1);
+    
     puts("Enter the bases of the final number systems");
     scanf("%d", &basenumbersystem2);
+    
     if (ValideteBase(basenumbersystem1) == 0 || ValideteBase(basenumbersystem2) == 0) {
         puts("Bad input");
         return 0;
     }
-    char *number = malloc(15 * sizeof(char));
+    
+    char *number = malloc(15 * sizeof(char)); //проверка выделения памяти
     if (number == NULL) {
         puts("Memory Error");
         return 0;
     }
+    
     puts("Enter the number");
     scanf("%14s", number);
+    
     if (ValideteNumber(number, basenumbersystem1, (int)strlen(number)) == 0) {
         puts("Bad input");
         free(number);
         return 0;
     }
+    
     double numberindecimal = StringToDecimal(number, basenumbersystem1);
+    
     char * result = DecimalToString(numberindecimal, basenumbersystem2);
     printf("%s\n", result);
+    
     free(number);
     free(result);
+    
     return 0;
 }
