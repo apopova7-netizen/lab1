@@ -21,6 +21,7 @@ char* FloatDecimalToString(double, int);
 char* DecimalToString(double, int);
 #endif
 
+/*checks the validity of the number system*/
 int ValideteBase(int base) {
     if (base >= 2 && base <= 16 )
         return 1;
@@ -50,7 +51,7 @@ char ValueToChar(int value) {
 
 /* Returns a list of characters that are valid in the given number system. */
 char* AcceptableSymbols(int base) {
-    char *listofcharacters = malloc((base  + 2)* sizeof(char));
+    char *listofcharacters = malloc((base  + 2)* sizeof(char)); //проверка выделения памяти
 
     if (listofcharacters == NULL)
         return NULL;
@@ -62,7 +63,9 @@ char* AcceptableSymbols(int base) {
     return listofcharacters;
 }
 
-/* checks that all characters in the number satisfy the given number system  и делает все проверки на правильность числа */
+/* checks that all characters in the number satisfy the given number system
+ * and that there are no leading zeros, dots at the beginning and end of the
+ * number, or more than one dot*/
 int ValideteNumber(const char *number, int base, int len) {
     char *list = AcceptableSymbols(base);
 
@@ -107,6 +110,7 @@ int ValideteNumber(const char *number, int base, int len) {
     return 1;
 }
 
+/*Splits a string number into its integer and fractional parts.*/
 void SplitNumberString(const char* number, char* integerpart, char* fractionalpart) {
     int point = 0, pointindex = 0, lastintindex = 0, lastfractionalindex = 0;
     for (int i = 0; *(number + i) != '\0'; i++) {
@@ -114,11 +118,13 @@ void SplitNumberString(const char* number, char* integerpart, char* fractionalpa
         if (*(number + i) == '.')
             point++;
 
+        /* Writes down the integer part of the number. */
         if (point == 0) {
             pointindex++;
             *(integerpart + i) = *(number + i);
             lastintindex = i;
         }
+        /* Writes down the fractional part of the number. */
         else if (*(number + i) != '.') {
             *(fractionalpart + i - 1 - pointindex) = *(number + i);
             lastfractionalindex = i - 1 - pointindex;
@@ -128,7 +134,8 @@ void SplitNumberString(const char* number, char* integerpart, char* fractionalpa
     *(fractionalpart + lastfractionalindex + 1) = '\0';
 }
 
-/* The Gorner algorithm */
+/* Converts an integer part from a certain number system to decimal using
+ * the Gorner algorithm */
 int IntStringToDecimal(const char* integerpart, int base) {
     int result = 0;
     for (int i = 0; *(integerpart + i) != '\0'; i++)
@@ -136,6 +143,7 @@ int IntStringToDecimal(const char* integerpart, int base) {
     return result;
 }
 
+/* Converts an fractional part from a certain number system to decimal */
 double FracStringToDecimal(const char* fractionalpart, int base, int len) {
     double result = 0;
     for (int i = len - 1; i >= 0; i--)
@@ -143,6 +151,8 @@ double FracStringToDecimal(const char* fractionalpart, int base, int len) {
     return result;
 }
 
+/*converts the integer and fractional parts of a number to the decimal system
+ *and sums the results*/
 double StringToDecimal(const char* number, int base) {
     char* integerpart = malloc(sizeof(char) * 14); //проверка выделения памяти
     char* fractionalpart = malloc(sizeof(char) * 14); //проверка выделения памяти
@@ -220,32 +230,44 @@ char* FloatDecimalToString(double number, int base) {
     return res;
 }
 
-//если целое, то просто вывод числа
-//если дробное, то в зависимости от количества набранных символов
+/*Converts a number from the decimal number system to the finite number system*/
 char* DecimalToString(double num, int base) {
+
+    /*If the number does not contain a fractional part, simply convert it.*/
     if (num == (int)num) {
         char* result = IntDecimalToString((int)num, base);
         return result;
     }
+    
+    /* If there is a fractional part, it converts the whole and fractional parts
+     * separately and combines the results*/
     int integerpart = (int)num;
     double fractionalpart = num - integerpart;
+    
     char* convintpart = IntDecimalToString(integerpart, base);
     char* convfracpart = FloatDecimalToString(fractionalpart, base);
-    char* result = malloc((strlen(convfracpart) + strlen(convintpart) + 1) * sizeof(char));
+    
+    char* result = malloc((strlen(convfracpart) + strlen(convintpart) + 1) * sizeof(char)); //проверка выделения памяти
+    
     int pointindex = 0;
     for (int i = 0; i < strlen(convintpart); i++) {
         *(result + i) = *(convintpart + i);
         pointindex = i + 1;
     }
+    
     *(result + pointindex) = '.';
     int j = 0;
     for (int i = pointindex + 1; i <= pointindex + strlen(convfracpart); i++) {
         *(result + i) = *(convfracpart + j);
         j++;
     }
+    
     *(result + pointindex + strlen(convfracpart) + 1) = '\0';
+    
     free(convfracpart);
     free(convintpart);
+    
     return result;
 }
+
 
