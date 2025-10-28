@@ -112,28 +112,18 @@ int ValideteNumber(const char *number, int base, int len) {
 
 /*Splits a string number into its integer and fractional parts.*/
 void SplitNumberString(const char* number, char* integerpart, char* fractionalpart) {
-    int point = 0, pointindex = 0, lastintindex = 0, lastfractionalindex = 0;
-    for (int i = 0; *(number + i) != '\0'; i++) {
-
-        if (*(number + i) == '.')
-            point++;
-
-        /* Writes down the integer part of the number. */
-        if (point == 0) {
-            pointindex++;
-            *(integerpart + i) = *(number + i);
-            lastintindex = i;
-        }
-        /* Writes down the fractional part of the number. */
-        else if (*(number + i) != '.') {
-            *(fractionalpart + i - 1 - pointindex) = *(number + i);
-            lastfractionalindex = i - 1 - pointindex;
-        }
+    char* pointindex  = strchr(number, '.'); // нашли индекс точки
+    if (pointindex == NULL) {
+        strcpy(integerpart, number); // если нет точки - значит все число целая часть и дробной нет
+        *fractionalpart = '\0';
     }
-    *(integerpart + lastintindex + 1) = '\0';
-    *(fractionalpart + lastfractionalindex + 1) = '\0';
-}
+    else {
+        strncpy(integerpart, number, pointindex - number); // копируем целую часть pointindex - number - длина целой части
+        *(integerpart + (pointindex - number)) = '\0';
 
+        strcpy(fractionalpart, pointindex + 1); // конецу строки уже есть в number
+    }
+}
 /* Converts an integer part from a certain number system to decimal using
  * the Gorner algorithm */
 int IntStringToDecimal(const char* integerpart, int base) {
@@ -143,7 +133,7 @@ int IntStringToDecimal(const char* integerpart, int base) {
     return result;
 }
 
-/* Converts an fractional part from a certain number system to decimal */
+/* Converts a fractional part from a certain number system to decimal */
 double FracStringToDecimal(const char* fractionalpart, int base, int len) {
     double result = 0;
     for (int i = len - 1; i >= 0; i--)
@@ -155,6 +145,7 @@ double FracStringToDecimal(const char* fractionalpart, int base, int len) {
  *and sums the results*/
 double StringToDecimal(const char* number, int base) {
     char* integerpart = malloc(sizeof(char) * 14); //проверка выделения памяти
+
     char* fractionalpart = malloc(sizeof(char) * 14); //проверка выделения памяти
 
     *(integerpart + 13) = '\0';
@@ -238,35 +229,36 @@ char* DecimalToString(double num, int base) {
         char* result = IntDecimalToString((int)num, base);
         return result;
     }
-    
+
     /* If there is a fractional part, it converts the whole and fractional parts
      * separately and combines the results*/
     int integerpart = (int)num;
     double fractionalpart = num - integerpart;
-    
+
     char* convintpart = IntDecimalToString(integerpart, base);
     char* convfracpart = FloatDecimalToString(fractionalpart, base);
-    
-    char* result = malloc((strlen(convfracpart) + strlen(convintpart) + 1) * sizeof(char)); //проверка выделения памяти
-    
+
+    int lenres = strlen(convintpart) + strlen(convfracpart) + 2;
+    char* result = malloc(lenres * sizeof(char)); //проверка выделения памяти
+
     int pointindex = 0;
     for (int i = 0; i < strlen(convintpart); i++) {
         *(result + i) = *(convintpart + i);
         pointindex = i + 1;
     }
-    
+
     *(result + pointindex) = '.';
     int j = 0;
     for (int i = pointindex + 1; i <= pointindex + strlen(convfracpart); i++) {
         *(result + i) = *(convfracpart + j);
         j++;
     }
-    
-    *(result + pointindex + strlen(convfracpart) + 1) = '\0';
-    
+
+    *(result + lenres - 1) = '\0';
+
     free(convfracpart);
     free(convintpart);
-    
+
     return result;
 }
 
