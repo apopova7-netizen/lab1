@@ -1,29 +1,42 @@
 //
-// Created by Lenovo on 26.10.2025.
+// Created by Lenovo on 29.10.2025.
 //
 
-#ifndef STUDENT1_H
-#define STUDENT1_H
+#ifndef FUNCTION_PROJECT_1_STUDENT_1_H
+#define FUNCTION_PROJECT_1_STUDENT_1_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int ValideteBase(int);
-char ValueToChar(int);
+#define MAX_LENGTH_OF_NUMBER 13
+#define MAX_LENGTH_OF_FRACTIONAL_PART 12
+int ChekBaseInput();
+int ValidateBase(int);
 int CharToValue(char);
+char ValueToChar(int);
 char* AcceptableSymbols(int);
-int ValideteNumber(const char *, int, int);
-void SplitNumberString(const char* , char*,char*);
-int IntStringToDecimal(const char*, int);
-double FracStringToDecimal(const char*, int, int);
-double StringToDecimal(const char*, int);
+int ValidateNumber(char *, int, int);
+void SplitNumberString(char* , char*,char*);
+int IntStringToDecimal(char*, int);
+double FracStringToDecimal(char*, int, int);
+double StringToDecimal(char*, int);
 char* IntDecimalToString(int, int);
 char* FloatDecimalToString(double, int);
 char* DecimalToString(double, int);
+
 #endif
 
+/* Checks that there are no more characters after the base number entered. */
+int ChekBaseInput() {
+    char nextchar;
+    if (scanf("%c", &nextchar) == 1 && nextchar != '\n' && nextchar != ' ')
+        return 0;
+    return 1;
+}
+
 /*checks the validity of the number system*/
-int ValideteBase(int base) {
-    if (base >= 2 && base <= 16 )
+int ValidateBase(int base) {
+    if (ChekBaseInput() == 1 && base >= 2 && base <= 16)
         return 1;
     return 0;
 }
@@ -37,7 +50,6 @@ int CharToValue(char c) {
 
     if (c >= 'A' && c <= 'F')
         return c - 'A' + 10;
-    return -1;
 }
 /* Returns the character designation of a number using the ASCII table. */
 char ValueToChar(int value) {
@@ -48,10 +60,9 @@ char ValueToChar(int value) {
 }
 
 
-
 /* Returns a list of characters that are valid in the given number system. */
 char* AcceptableSymbols(int base) {
-    char *listofcharacters = malloc((base  + 2)* sizeof(char)); //проверка выделения памяти
+    char *listofcharacters = malloc((base  + 2) * sizeof(char)); //проверка выделения памяти
 
     if (listofcharacters == NULL)
         return NULL;
@@ -66,10 +77,10 @@ char* AcceptableSymbols(int base) {
 /* checks that all characters in the number satisfy the given number system
  * and that there are no leading zeros, dots at the beginning and end of the
  * number, or more than one dot*/
-int ValideteNumber(const char *number, int base, int len) {
+int ValidateNumber(char *number, int base, int len) {
     char *list = AcceptableSymbols(base);
 
-    if (len > 13 || *number == '.' || *(number + len - 1) == '.') {
+    if (len > MAX_LENGTH_OF_NUMBER || *number == '.' || *(number + len - 1) == '.') {
         free(list);
         return 0;
     }
@@ -111,22 +122,35 @@ int ValideteNumber(const char *number, int base, int len) {
 }
 
 /*Splits a string number into its integer and fractional parts.*/
-void SplitNumberString(const char* number, char* integerpart, char* fractionalpart) {
-    char* pointindex  = strchr(number, '.'); // нашли индекс точки
-    if (pointindex == NULL) {
-        strcpy(integerpart, number); // если нет точки - значит все число целая часть и дробной нет
+void SplitNumberString(char* number, char* integerpart, char* fractionalpart) {
+
+    int pointindex = 0;
+
+    for (int i = 0; number[i] != '\0'; i++) {
+        if (number[i] == '.') {
+            pointindex = i;
+            break;
+        }
+    }
+    /* If there is no dot in the number,copies the integer part and
+     * leaves the fractional part empty.*/
+    if (pointindex == 0) {
+        strcpy(integerpart, number);
         *fractionalpart = '\0';
     }
     else {
-        strncpy(integerpart, number, pointindex - number); // копируем целую часть pointindex - number - длина целой части
-        *(integerpart + (pointindex - number)) = '\0';
+        /* copies the integer part*/
+        strncpy(integerpart, number, pointindex);
+        *(integerpart + pointindex) = '\0';
 
-        strcpy(fractionalpart, pointindex + 1); // конецу строки уже есть в number
+        /* copies the fractional part*/
+        strcpy(fractionalpart, number + pointindex + 1);
     }
 }
+
 /* Converts an integer part from a certain number system to decimal using
  * the Gorner algorithm */
-int IntStringToDecimal(const char* integerpart, int base) {
+int IntStringToDecimal(char* integerpart, int base) {
     int result = 0;
     for (int i = 0; *(integerpart + i) != '\0'; i++)
         result = result * base + CharToValue(*(integerpart + i));
@@ -134,7 +158,7 @@ int IntStringToDecimal(const char* integerpart, int base) {
 }
 
 /* Converts a fractional part from a certain number system to decimal */
-double FracStringToDecimal(const char* fractionalpart, int base, int len) {
+double FracStringToDecimal(char* fractionalpart, int base, int len) {
     double result = 0;
     for (int i = len - 1; i >= 0; i--)
         result = (result + CharToValue(*(fractionalpart + i))) / base;
@@ -143,13 +167,13 @@ double FracStringToDecimal(const char* fractionalpart, int base, int len) {
 
 /*converts the integer and fractional parts of a number to the decimal system
  *and sums the results*/
-double StringToDecimal(const char* number, int base) {
-    char* integerpart = malloc(sizeof(char) * 14); //проверка выделения памяти
+double StringToDecimal(char* number, int base) {
+    char* integerpart = malloc( (MAX_LENGTH_OF_NUMBER + 1) * sizeof(char)); //проверка выделения памяти
 
-    char* fractionalpart = malloc(sizeof(char) * 14); //проверка выделения памяти
+    char* fractionalpart = malloc( (MAX_LENGTH_OF_FRACTIONAL_PART + 1) * sizeof(char)); //проверка выделения памяти
 
-    *(integerpart + 13) = '\0';
-    *(fractionalpart + 13) = '\0';
+    *(integerpart + MAX_LENGTH_OF_NUMBER) = '\0';
+    *(fractionalpart + MAX_LENGTH_OF_NUMBER) = '\0';
 
     SplitNumberString(number, integerpart, fractionalpart);
 
@@ -200,10 +224,10 @@ char* IntDecimalToString(int number, int base) {
  * The fractional remainder is then converted in a similar manner. */
 char* FloatDecimalToString(double number, int base) {
     int singsafterdot = 0;
-    char *res = malloc(14 * sizeof(char)); //проверка выделения памяти
+    char *res = malloc((MAX_LENGTH_OF_NUMBER + 1) * sizeof(char)); //проверка выделения памяти
 
     /* Needs to get the first 12 digits after decimal point */
-    while (singsafterdot < 12) {
+    while (singsafterdot < MAX_LENGTH_OF_FRACTIONAL_PART) {
         char character = ValueToChar((int)(number * base));
         *(res + singsafterdot) = character;
 
@@ -261,5 +285,7 @@ char* DecimalToString(double num, int base) {
 
     return result;
 }
+
+
 
 
