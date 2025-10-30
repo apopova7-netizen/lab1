@@ -1,6 +1,6 @@
 
 //
-// Created by Lenovo on 15.10.2025.
+// Created by Lenovo on 30.10.2025.
 //
 
 #include "Function project 1 student1.h"
@@ -13,21 +13,21 @@ int main(void) {
 
     if (scanf("%d", &basenumbersystem1) != 1 || ValidateBase(basenumbersystem1) == 0) {
         puts("Bad input");
-        return 1;
+        return 0;
     }
 
     puts("Enter the bases of the final number systems");
 
     if (scanf("%d", &basenumbersystem2) != 1 || ValidateBase(basenumbersystem2) == 0) {
         puts("Bad input");
-        return 1;
+        return 0;
     }
 
     /* Allocates memory for the number. */
     char *number = malloc(MAX_LENGTH_OF_NUMBER * sizeof(char)); //проверка выделения памяти
     if (number == NULL) {
         puts("Memory Error");
-        return 1;
+        return 0;
     }
     /* Asks for the number. */
     puts("Enter the number");
@@ -37,7 +37,7 @@ int main(void) {
     if (ValidateNumber(number, basenumbersystem1, (int)strlen(number)) == 0) {
         puts("Bad input");
         free(number);
-        return 1;
+        return 0;
     }
     /*Converts the number to the decimal number system from the initial
      *number system.*/
