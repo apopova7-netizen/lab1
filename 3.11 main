@@ -1,0 +1,88 @@
+//
+// Created by Lenovo on 30.10.2025.
+//
+
+#include "student1.h"
+
+int main(void) {
+    int basenumbersystem1, basenumbersystem2;
+    char *number = malloc((MAX_LENGTH_OF_NUMBER + 1) * sizeof(char));
+
+    if (number == NULL) {
+        puts("Memory Error");
+        return 0;
+    }
+
+    /* Asks for the bases of the number systems, the number, and checks that the data has been read */
+    puts("Enter the initial, final number systems and number");
+
+    if (scanf("%d %d %13s", &basenumbersystem1, &basenumbersystem2, number) != 3){
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+    /* Check that no extra data has been entered */
+    if (CheckInput() == 0) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    if (ValidateBase(basenumbersystem1) == 0 || ValidateBase(basenumbersystem2) == 0) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    /* Checks if the number is entered correctly. */
+    int valid = ValidateNumber(number, basenumbersystem1, (int)strlen(number));
+
+    if (valid == 0) {
+        puts("Bad input");
+        free(number);
+        return 0;
+    }
+
+    if (valid == MEMORY_ERROR_INT) {
+        puts("Memory Error");
+        free(number);
+        return 0;
+    }
+
+    /* Converts the number to the decimal number system from the initial
+     * number system. */
+    double numberindecimal = StringToDecimal(number, basenumbersystem1);
+
+    if (numberindecimal == MEMORY_ERROR_DOUBLE) {
+        puts("Memory Error");
+        free(number);
+        return 0;
+    }
+
+    /* Converts the number from the decimal number system to the final number system. */
+    char * result = DecimalToString(numberindecimal, basenumbersystem2);
+
+    if (result == MEMORY_ERROR_CHAR) {
+        puts("Memory Error");
+        free(number);
+        return 0;
+    }
+
+    /* Rounds a number to 12 decimal places. */
+    char* roundingresult = Rounding(result,basenumbersystem2);
+
+    if (roundingresult == MEMORY_ERROR_CHAR) {
+        puts("Memory Error");
+        free(number);
+        free(result);
+        return 0;
+    }
+    printf("%s\n", roundingresult);
+
+    free(number);
+    free(result);
+    free(roundingresult);
+    return 0;
+}
+
+
