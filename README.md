@@ -1,53 +1,51 @@
-Документация библиотеки сортировки
-Роль в проекте: Архитектор библиотеки
-Я отвечаю за три ключевых компонента:
+Sorting Library Documentation
+Role: Library Architect
+Unified Interface (Interface.c) — universal function to run any sorting algorithm
 
-Единый интерфейс (ExecuteSort) — универсальная функция запуска любого алгоритма
+Benchmarking System (Benchmark.c) — performance testing and analysis
 
-Система бенчмаркинга (Benchmark.c) — тестирование производительности
+Optimal Algorithm Selection (OptimalAlgorithm.c) — algorithm selection based on input data
 
-Оптимальный выбор алгоритма (OptimalAlgorithm.c) — интеллектуальный подбор алгоритма под данные
+1. Unified Interface (Interface.c)
+Purpose
+Provide a single entry point for running any sorting algorithm, hiding differences in their parameters.
 
-1. Единый интерфейс (Interface.c)
-Назначение
-Предоставить единую точку входа для запуска любого алгоритма сортировки, скрывая различия в их параметрах.
-
-Структура параметров
+Parameter Structure
 c
 typedef struct {
-    // Какой алгоритм используем
+    // Which algorithm to use
     SortingMethod method;
     
-    // Основные параметры (есть у всех)
-    void *arr;                    // массив
-    int n;                         // размер
-    size_t elemSize;                // размер элемента
-    int (*cmp)(const void*, const void*); // функция сравнения
+    // Basic parameters (common to all)
+    void *arr;                    // array
+    int n;                         // size
+    size_t elemSize;                // element size
+    int (*cmp)(const void*, const void*); // comparison function
     
-    // Специальные параметры для конкретных алгоритмов
-    int minVal, maxVal;             // для CountingSort
-    int (*getDigit)(const void*, int); // для RadixSort
-    int maxDigits;                   // для RadixSort
-    int left, right;                 // для StoogeSort
-    PivotStrategy strategyPivot;     // для QuickSort
-    PartitionType typePartition;      // для QuickSort
+    // Special parameters for specific algorithms
+    int minVal, maxVal;             // for CountingSort
+    int (*getDigit)(const void*, int); // for RadixSort
+    int maxDigits;                   // for RadixSort
+    int left, right;                 // for StoogeSort
+    PivotStrategy strategyPivot;     // for QuickSort
+    PartitionType typePartition;      // for QuickSort
     
-    // Счетчики операций
-    long *comparisons;                // количество сравнений
-    long *swaps;                       // количество обменов
+    // Operation counters
+    long *comparisons;                // number of comparisons
+    long *swaps;                       // number of swaps
 } SortParams;
-Основная функция
+Main Function
 c
 void ExecuteSort(SortParams params);
-Как работает:
+How it works:
 
-Принимает структуру со всеми возможными параметрами
+Takes a structure with all possible parameters
 
-По полю method определяет нужный алгоритм
+Determines the required algorithm by the method field
 
-Передает только релевантные параметры в конкретную функцию
+Passes only relevant parameters to the specific function
 
-Пример использования:
+Usage Example:
 
 c
 SortParams params;
@@ -62,106 +60,78 @@ params.comparisons = &compCount;
 params.swaps = &swapCount;
 
 ExecuteSort(params);
-2. Система бенчмаркинга (Benchmark.c)
-Назначение
-Автоматическое тестирование алгоритмов на различных типах данных с высокоточным измерением производительности.
+2. Benchmarking System (Benchmark.c)
+Purpose
+Automated testing of algorithms on various data types with high-precision performance measurement.
 
-Ключевые возможности
-Функция	Описание
-GetPreciseTimeMS()	Таймер с микросекундной точностью (QueryPerformanceCounter)
-GenerateRandomIntArray()	Генерация случайного int массива
-GenerateRandomDoubleArray()	Генерация случайного double массива
-GenerateSortedArray()	Отсортированный массив
-GenerateReversedArray()	Массив в обратном порядке
-GenerateAlmostSortedArray()	Почти отсортированный массив
-Основные функции тестирования
-1. Тестирование одного алгоритма
+Main Testing Functions
+2.1 Testing a Single Algorithm
 c
 void RunSingleTest(SortingMethod algo, 
                    PivotStrategy strategy, 
                    PartitionType partition);
-Что тестирует:
+What it tests:
 
-Маленькие массивы (12 элементов) — int и double (если поддерживается)
+Small arrays (12 elements) — int and double (if supported)
 
-Вывод массива ДО и ПОСЛЕ сортировки
+Array output BEFORE and AFTER sorting
 
-Время выполнения
+Execution time
 
-Время на элемент
+Time per element
 
-Количество сравнений и обменов (если алгоритм их поддерживает)
+Number of comparisons and swaps (if supported by the algorithm)
 
-Большие массивы (10000 элементов) — 4 типа:
+Large arrays (10000 elements) — 4 types:
 
-Random (случайный)
+Random
 
-Sorted (отсортированный)
+Sorted
 
-Reverse (обратный порядок)
+Reverse
 
-Almost Sorted (почти отсортированный, 5% перестановок)
+Almost Sorted (5% permutations)
 
-Для каждого типа выводится:
+For each type it outputs:
 
-Время выполнения
+Execution time
 
-Время на элемент
+Time per element
 
-Количество сравнений и обменов
+Number of comparisons and swaps
 
-2. Тестирование всех вариаций QuickSort
+2.2 Testing All QuickSort Variations
 c
 void BenchmarkQuickSortAllVariations(void);
-Тестирует все 10 комбинаций стратегий QuickSort:
+Tests all 10 combinations of QuickSort strategies:
 
-5 стратегий выбора опорного элемента: FIRST, LAST, MIDDLE, MEDIAN, RANDOM
+5 pivot selection strategies: FIRST, LAST, MIDDLE, MEDIAN, RANDOM
 
-2 типа разбиения: LOMUTO, HOARE
+2 partition types: LOMUTO, HOARE
 
-Для каждой комбинации тестирование на 4 типах массивов (случайный, отсортированный, обратный, почти отсортированный).
+Each combination is tested on 4 array types (random, sorted, reverse, almost sorted).
 
-Пример вывода:
+Output Example:
 
 text
 ===== Random =====
   Configuration              | Time         | ns/el    | Compares | Swaps
   FIRST + LOMUTO             | 1.913700     | 191.4    | 160510   | 85666
   MEDIAN + HOARE             | 1.707600     | 170.8    | 150110   | 42035
-3. Тестирование всех алгоритмов
+2.3 Testing All Algorithms
 c
 void TestAllAlgorithms(void);
-Запускает RunSingleTest для всех доступных алгоритмов с конфигурацией PIVOT_MEDIAN + PARTITION_HOARE (для QuickSort).
+Runs RunSingleTest for all available algorithms.
 
-3. Оптимальный выбор алгоритма (OptimalAlgorithm.c)
-Назначение
-Автоматически определить наиболее эффективный алгоритм сортировки на основе анализа входных данных.
+3. Optimal Algorithm Selection (OptimalAlgorithm.c)
+Purpose
+Automatically determine the most efficient sorting algorithm based on input data analysis.
 
-Вспомогательные функции
-c
-int IsIntArray(size_t elemSize);
-// Проверяет, является ли массив типа int (по размеру элемента)
+Decision Rules:
 
-int IsSorted(void *arr, int n, size_t elemSize, int (*cmp)(const void*, const void*));
-// Проверяет, отсортирован ли массив по возрастанию
-
-void FindMinMaxInt(int *arr, int n, int *minVal, int *maxVal);
-// Находит минимальное и максимальное значение в int массиве
-Логика выбора
-c
-SortingMethod SelectOptimalAlgorithm(void *arr, int n, size_t elemSize,
-                                      int (*cmp)(const void*, const void*),
-                                      int *outMinVal, int *outMaxVal);
-Правила принятия решений:
-
-Условие	Выбранный алгоритм	Обоснование
-n ≤ 100	SORT_SHELL	На маленьких массивах важнее низкие накладные расходы, ShellSort показывает хорошие результаты
-n > 100 и массив отсортирован	SORT_TIMSORT	TimSort работает за O(n) на отсортированных данных
-n > 100 и тип НЕ int	SORT_TIMSORT	TimSort — лучший универсальный алгоритм для сложных типов
-n > 100, тип int, не отсортирован	SORT_COUNTING	CountingSort работает за O(n) для целых чисел с ограниченным диапазоном
-Важные замечания
-Для CountingSort функция возвращает через outMinVal и outMaxVal минимальное и максимальное значение, необходимые для работы алгоритма.
-
-Определение типа происходит по elemSize: sizeof(int) считается int массивом, все остальное — "не int".
-
-Проверка на отсортированность выполняется за один проход по массиву (O(n)).
+Condition	Selected Algorithm	Rationale
+n ≤ 100	SORT_SHELL	For small arrays, ShellSort shows good results
+n > 100 and array is sorted	SORT_TIMSORT	TimSort runs in O(n) on sorted data
+n > 100 and type is NOT int	SORT_TIMSORT	TimSort is the best universal algorithm for complex types
+n > 100, type is int, not sorted	SORT_COUNTING	CountingSort runs in O(n) for integers
+For CountingSort, the function returns minimum and maximum values through outMinVal and outMaxVal — required for the algorithm to work.
